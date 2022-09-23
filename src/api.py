@@ -1,4 +1,6 @@
 import logging
+
+import pytz
 import tenacity
 import time
 import os
@@ -8,7 +10,7 @@ import n26.api
 import n26.config
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from src.paths import get_n26_token_data_filepath
 from src.config import load_ynab_config, get_n26_account_config
@@ -98,11 +100,18 @@ def download_n26_transactions(account_name, retries=0, delay=60):
     watchdog = retries  # trials before failure
     while watchdog >= 0:  # If there are still trials left...
         logger.info("Requesting transfers to the N26 API...")
+        from_time = datetime.now() - timedelta(180)
+        from_time = int(from_time.timestamp()) * 1000
+        to_time = int(datetime.now().timestamp()) * 1000
         try:
             # Try to call the API. This will potentially show a two-factor notification
             # in the phone of the user. In that case, if the access is not granted, the
             # api client will timeout with a tenacy.RetryError exception
-            transactions = client.get_transactions(limit=99999)
+            transactions = client.get_transactions(
+                from_time=from_time,
+                to_time=to_time,
+                limit=99999,
+            )
             break  # Exit the loop on success
         except tenacity.RetryError:
             logger.error("No app authentication provided! Waiting 30 min...")
@@ -184,17 +193,22 @@ def _convert_n26_transaction_to_ynab(t_n26, account_id):
     Returns:
         ynab_client.Transaction: transaction in the YNAB native format.
     """
+    tz = pytz.timezone('Europe/Berlin')
+    date = datetime.fromtimestamp(t_n26["visibleTS"] / 1000).astimezone(tz)
+    payee_name = t_n26.get("merchantName", None)
+    if payee_name is None:
+        payee_name = t_n26.get("partnerName", None)
     t_ynab = {
         "id": t_n26["id"],
         "import_id": t_n26["id"],
         "account_id": account_id,
-        "date": datetime.fromtimestamp(t_n26["visibleTS"] / 1000),
+        "date": date,
         "amount": int(t_n26["amount"] * 1000),
         "memo": t_n26.get("referenceText", None),
         "cleared": "uncleared",
         "approved": False,
         "deleted": False,
-        "payee_name": t_n26.get("merchantName", None),
+        "payee_name": payee_name,
     }
     t_ynab = ynab_client.TransactionWrapper(t_ynab)
     return t_ynab.transaction

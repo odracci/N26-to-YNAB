@@ -19,3 +19,4 @@ logs/*
 
 # Python garbage
 __pycache__
+/venv/

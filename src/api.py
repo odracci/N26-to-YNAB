@@ -12,6 +12,8 @@ import pandas as pd
 
 from datetime import datetime, timedelta, timezone
 
+#import ynab_client
+
 from src.paths import get_n26_token_data_filepath
 from src.config import load_ynab_config, get_n26_account_config
 from src.exceptions import (

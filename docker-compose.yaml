@@ -1,0 +1,23 @@
+version: '3.5'
+
+services:
+  rick:
+    build: .
+    image: n26-to-yanb
+    command:
+      - python3
+      - main.py
+      - -a
+      - rick
+    volumes:
+      - .:/app
+  glo:
+    build: .
+    image: n26-to-yanb
+    command:
+      - python3
+      - main.py
+      - -a
+      - glo
+    volumes:
+      - .:/app

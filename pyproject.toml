@@ -5,11 +5,13 @@ description = "Bridge between YNAB and N26 to automate transaction imports"
 authors = ["ivallesp <ivanvallesperez@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
-n26 = "^3.0.0"
-ynab_client = "^0.1.8"
+python = "^3.9.9"
+n26 = "3.3.1"
+#ynab_client = { git = "https://github.com/gchiam/ynab-client-python.git", rev = "6d154f3" }
+ynab_client = { git = "https://github.com/odracci/ynab-client-python.git", rev = "051242f" }
 pandas = "^1.0.1"
 openpyxl = "^3.0.3"
+pytz = "^2023.3.post1"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.12.0"

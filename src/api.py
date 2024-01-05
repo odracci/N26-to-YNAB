@@ -100,7 +100,7 @@ def download_n26_transactions(account_name, retries=0, delay=60):
     watchdog = retries  # trials before failure
     while watchdog >= 0:  # If there are still trials left...
         logger.info("Requesting transfers to the N26 API...")
-        from_time = datetime.now() - timedelta(180)
+        from_time = datetime.now() - timedelta(90)
         from_time = int(from_time.timestamp()) * 1000
         to_time = int(datetime.now().timestamp()) * 1000
         try:
